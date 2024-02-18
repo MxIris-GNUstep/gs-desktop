@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ "$1" = "screen" ];then
+  /usr/bin/scrot --delay 1 "$2"
+  exit
+fi
+if [ "$1" = "window" ];then
+  xdotool selectwindow windowactivate || exit
+  /usr/bin/scrot --b -u "$2"
+  exit
+fi
+
+/usr/bin/scrot -b --select "$2"

@@ -17,6 +17,7 @@ libgl1-mesa-dev
 util-linux-locales
 picom
 info
+emacs
 fzf
 gdb
 clang
@@ -28,6 +29,7 @@ libtool
 xinit
 bindfs
 x11-xserver-utils
+gnuplot-x11
 xdotool
 libffcall-dev
 libxml2-dev
@@ -86,6 +88,7 @@ libicu-dev
 icu-devtools
 sane-utils
 scrot
+slop
 rclone
 htop
 vim-nox
@@ -97,6 +100,7 @@ vlc-bin
 vlc-data
 vlc-plugin-video-output
 vlc-plugin-base
+ffmpeg
 xutils-dev
 xnest
 xterm
@@ -110,8 +114,11 @@ recollcmd
 libical-dev
 p7zip
 udisks2
-chromium
 libpcap-dev
 autorandr
 dict-wn
 dict-jargon
+python3-pyftpdlib
+robin-map-dev
+telnet
+chromium

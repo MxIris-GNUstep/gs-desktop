@@ -38,6 +38,26 @@
   [super dealloc];
 }
 
+- (NSView*) iconView {
+  return iconView;
+}
+
+- (NSWindow*) window {
+  return window;
+}
+
+- (NSMenu*) menu {
+  return menu;
+}
+
+- (BOOL) validateMenuItem:(NSMenuItem*) item {
+  return YES;
+}
+
+- (BOOL) validateUserInterfaceItem:(id) item {
+  return YES;
+}
+
 - (NSString*) stringForControl:(id) val {
   if (!val) return @"";
 
@@ -82,6 +102,7 @@
 }
 
 - (id)forwardingTargetForSelector:(SEL)aSelector {
+  //NSString* sel = NSStringFromSelector(aSelector);
   return nil;
 }
 
@@ -89,13 +110,21 @@
   return [NSMethodSignature signatureWithObjCTypes:"@^v^v^c@"];
 }
 
-
 - (void)forwardInvocation:(NSInvocation *)anInvocation {
   NSString* sel = NSStringFromSelector([anInvocation selector]);
   id val = nil;
   [anInvocation getArgument:&val atIndex:2];
 
-  if ([sel hasPrefix:@"set"]) {
+  if ([sel isEqualToString:@"setMenu:"]) {
+    ASSIGN(menu, val);
+  }
+  else if ([sel isEqualToString:@"setWindow:"]) {
+    ASSIGN(window, val);
+  }
+  else if ([sel isEqualToString:@"setIconView:"]) {
+    ASSIGN(iconView, val);
+  }
+  else if ([sel hasPrefix:@"set"]) {
     NSString* key = [sel substringFromIndex:3];
     key = [key substringToIndex:[key length] - 1];
     key = [key uppercaseString];
@@ -119,6 +148,9 @@
       NSData* data = [[self stringForContext]dataUsingEncoding:NSUTF8StringEncoding];
       NSMutableArray* args = [NSMutableArray array];
       [args addObject:act];
+      if (val && [val isKindOfClass:[NSString class]]) {
+        [args addObject:val];
+      }
       [delegate execTaskWithArguments:args data:data delegate:self];
     }
   }
@@ -128,7 +160,7 @@
   NSMutableString* buff = [NSMutableString string];
   for (NSString* key in [context allKeys]) {
     NSString* val = [context valueForKey:key];
-    [buff appendFormat:@"%@=%@\n", key, val];
+    [buff appendFormat:@"%@='%@'\n", key, val];
   }
   return buff;
 }

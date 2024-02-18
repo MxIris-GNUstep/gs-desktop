@@ -22,16 +22,47 @@
 
 #include "NSApplication+AppName.h"
 
+@implementation MYApplication
+
+- (void) setSuppressActivation:(BOOL) flag
+{
+    suppressActivation = flag;
+}
+- (void) activateIgnoringOtherApps:(BOOL) flag
+{
+    NSLog(@"activateIgnoringOtherApps");
+    if (suppressActivation) {
+        NSLog(@"suppress activate!");
+    }
+    else {
+        [super activateIgnoringOtherApps:flag];
+    }
+}
+- (void) setKeyWindow:(id) key
+{
+    ASSIGN(keyWindow, key);
+}
+- (id) keyWindow
+{
+    return keyWindow;
+}
+
+@end
+
 @implementation NSApplication (AppName)
++ (NSApplication *) sharedApplication
+{
+    if (NSApp == nil) 
+    {
+        [[MYApplication alloc] init];
+    }
+    return NSApp;
+}
+
 
 - (NSString *)applicationName
 {
     return (NSString *)[[[NSBundle mainBundle] infoDictionary] objectForKey: @"ApplicationName"];
-}
-
-- (void) xactivateIgnoringOtherApps:(BOOL) flag
-{
-    [[self delegate] performSelector:@selector(activateApplication) withObject:nil];
 }
 
 @end

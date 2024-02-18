@@ -1,5 +1,5 @@
 /*
-   Project: WebBrowser
+   Project: Librarian
 
    Copyright (C) 2020 Free Software Foundation
 
@@ -28,6 +28,8 @@
 #import <AppKit/AppKit.h>
 #import "Books.h"
 
+NSString* make_title(NSString* path);
+
 @interface Document : NSObject
 {
   IBOutlet NSWindow *window;
@@ -39,8 +41,13 @@
   Books* books;
   NSString* filePath;
 }
++ (Document*) lastActiveDocument;
+
 - (void) openFile:(NSString*) file;
 - (void) showWindow;
+- (void) list:(id) sender;
+- (NSString*) fileName;
+- (void) searchText:(NSString*) text;
 
 @end
 

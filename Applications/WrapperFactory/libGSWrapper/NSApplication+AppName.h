@@ -25,11 +25,19 @@
 #include <AppKit/AppKit.h>
 
 
-@interface NSApplication (SuppressAppIcon)
+@interface MYApplication : NSApplication 
+{
+    BOOL suppressActivation;
+    id keyWindow;
+}
 
-- (NSString *)applicationName;
-
+- (void) setKeyWindow:(id) key;
+- (void) setSuppressActivation:(BOOL) flag;
 @end
 
+@interface NSApplication (AppName)
++ (id) sharedApplication;
+- (NSString *)applicationName;
+@end
 
 #endif

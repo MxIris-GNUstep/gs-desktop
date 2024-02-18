@@ -1,0 +1,30 @@
+{
+    "## Comment" = "Do NOT change this file, Gorm maintains it";
+    AppController = {
+	Actions = (
+	    "showPrefPanel:",
+	    "showSystemProcesses:",
+	    "control:",
+	    "showSystemControl:",
+	    "editStartup:",
+	    "openDirectory:"
+	);
+	Outlets = (
+	    controlPanel,
+	    startupPanel
+	);
+	Super = NSObject;
+    };
+    FirstResponder = {
+	Actions = (
+	    "control:",
+	    "editStartup:",
+	    "openDirectory:",
+	    "orderFrontFontPanel:",
+	    "showPrefPanel:",
+	    "showSystemControl:",
+	    "showSystemProcesses:"
+	);
+	Super = NSObject;
+    };
+}

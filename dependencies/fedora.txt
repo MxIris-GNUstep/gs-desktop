@@ -22,6 +22,7 @@ picom
 xterm
 xset
 xsetroot
+xrefresh
 xwininfo
 xdotool
 gnuplot
@@ -73,8 +74,11 @@ recoll
 vim-enhanced
 htop
 scrot
+slop
 rclone
 vlc-core
+vlc-plugins-video-out
+ffmpeg
 pulseaudio-libs-devel
 chromium
 autorandr
@@ -85,4 +89,9 @@ texlive-latex
 texlive-dvips
 texlive-ec
 texinfo
+info
+emacs
 NetworkManager-tui
+python3-pyftpdlib
+robin-map-devel
+telnet

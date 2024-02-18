@@ -28,7 +28,7 @@
 
 - (id) initWithScript:(NSString*) nm {
   if ((self = [super init])) {
-    exec = [nm retain];
+    script = [nm retain];
   }
   return self;
 }
@@ -39,8 +39,23 @@
   [buff release];
   [env release];
   [exec release];
+  [script release];
   [task release];
   [super dealloc];
+}
+
+- (NSDictionary*)makeEnvironment
+{
+    NSDictionary* env = [[NSProcessInfo processInfo] environment];
+    NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithDictionary: env];
+    NSString* cmdkey = [[NSUserDefaults standardUserDefaults] valueForKey:@"GSFirstCommandKey"];
+
+    if ([cmdkey hasPrefix:@"Super_"])        [dict setValue:@"SUPER" forKey:@"GS_COMMAND_KEY"];
+    else if ([cmdkey hasPrefix:@"Control_"]) [dict setValue:@"CTRL" forKey:@"GS_COMMAND_KEY"];
+    else if ([cmdkey hasPrefix:@"Meta_"])    [dict setValue:@"META" forKey:@"GS_COMMAND_KEY"];
+    else                                     [dict setValue:@"ALT" forKey:@"GS_COMMAND_KEY"];
+
+    return dict;
 }
 
 - (void) execTaskWithArguments:(NSArray*) args 
@@ -49,22 +64,37 @@
 
   [self stopTask];
   ASSIGN(delegate, del);
-  NSLog(@"start %@ [%@]", exec, args);
   
   NSPipe* pipe = [NSPipe pipe];
   fh = [[pipe fileHandleForReading] retain];
   task = [[NSTask alloc] init];
   buff = [[NSMutableData alloc]init];
 
+  NSMutableDictionary *nenv = [NSMutableDictionary dictionaryWithDictionary:[self makeEnvironment]];
+
   if (env) {
-    NSDictionary *myenv = [[NSProcessInfo processInfo] environment];
-    NSMutableDictionary *nenv = [NSMutableDictionary dictionaryWithDictionary:myenv];
     [nenv addEntriesFromDictionary:env];
-    [task setEnvironment:nenv];
   }
 
-  [task setLaunchPath:exec];
-  [task setArguments:args];
+  NSLog(@">>>%@", nenv);
+
+  [task setEnvironment:nenv];
+  if (exec) {
+    [task setLaunchPath:exec];
+    NSMutableArray* a = [NSMutableArray array];
+    [a addObject:script];
+    if ([args count])  {
+      [a addObjectsFromArray:args];
+    }
+    NSLog(@"start %@ [%@]", exec, a);
+    [task setArguments:a];
+  }
+  else {
+    [task setLaunchPath:script];
+    [task setArguments:args];
+    NSLog(@"start %@ [%@]", script, args);
+  }
+
   [task setStandardOutput:pipe];
 
   pipe = [NSPipe pipe];
@@ -84,9 +114,17 @@
      name:NSFileHandleReadCompletionNotification 
      object:fh];
      
+  @try {
+    [task launch];
+  }
+  @catch (NSException* ex) {
+    NSLog(@"exception %@", ex);
+    [self taskDidTerminate:nil];
+    return;
+  }
+   
   status = 1;
   [fh readInBackgroundAndNotify];
-  [task launch];
 
   if ([data length]) {
     NSLog(@"write data");
@@ -96,6 +134,10 @@
     fo = nil;
     status = 2;
   }
+}
+
+- (void) setShellExec:(NSString*) sh {
+  ASSIGN(exec, sh);
 }
 
 - (void) setEnvironment:(NSDictionary*) e {

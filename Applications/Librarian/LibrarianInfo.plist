@@ -12,6 +12,21 @@
     NSMainNibFile = "Librarian.gorm";
     NSPrincipalClass = NSApplication;
     NSRole = Application;
+    NSServices = (
+	{
+	    NSKeyEquivalent = {
+		default = L;
+	    };
+	    NSMenuItem = {
+		default = "Search in Library";
+	    };
+	    NSMessage = searchSelectionService;
+	    NSPortName = Librarian;
+	    NSSendTypes = (
+		NSStringPboardType
+	    );
+	}
+    );
     NSTypes = (
 	{
 	    NSIcon = "Books.tiff";

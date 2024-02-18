@@ -32,7 +32,7 @@ sub unescape {
   return $s;
 }
 
-open(IN, "avahi-browse -p -a --resolve -t|");
+open(IN, "avahi-browse -l -p -a --resolve -t|");
 while(<IN>) {
   chomp();
   if ($_ =~ /^=;/) {
@@ -50,6 +50,12 @@ while(<IN>) {
     }
     elsif ($t eq "WebDAV File Share") {
       print ("S:$n\nT:$t\nU:$a:$p\n");
+    }
+    elsif ($t eq "SSH Remote Terminal") {
+      print ("S:$n\nT:$t\nU:ssh://$a:$p\n");
+    }
+    elsif ($t eq "SFTP File Transfer") {
+      print ("S:$n\nT:$t\nU:sftp://$a:$p\n");
     }
     else {
       print ("S:$n\nT:$t\nU:$a:$p\n");

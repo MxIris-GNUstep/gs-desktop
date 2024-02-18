@@ -157,6 +157,7 @@
     [[NSApp iconWindow] setContentView:mv];
 
     nmSetupPanel = [[NMSetup alloc] init];
+    networkInfo = [[NetworkInfo alloc] init];
   }
   return self;
 }
@@ -179,6 +180,12 @@
   [labelInfo setFont:[NSFont labelFontOfSize:7]];
   [labelInfo setStringValue:@"..."];
   [signalInfo setDoubleValue:0];
+
+  [NSApp setServicesProvider:self];
+  
+  if([NSApp isScriptingSupported]) {
+    [NSApp initializeApplicationScripting];
+  }
 
   [self performSelector:@selector(initConnection) 
              withObject:nil 
@@ -527,6 +534,11 @@
 - (void)showNetworkSetup:(id) sender
 {
   [nmSetupPanel showPanelAndRunSetup:sender];
+}
+
+- (void)showNetworkInfo:(id) sender
+{
+  [networkInfo showPanelAndRunInfo:sender];
 }
 
 - (void)showConfig:(id) sender

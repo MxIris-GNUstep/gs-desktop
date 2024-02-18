@@ -19,6 +19,9 @@ Network_RESOURCE_FILES = \
 	Resources/net.tiff \
 	Resources/asianet.tiff \
 	Resources/nmsetup.sh \
+	Resources/networkinfo \
+	Resources/ApplicationScripting.xlp \
+	Resources/ScriptingInfo.plist
 
 # Localization
 Network_LANGUAGES = English
@@ -27,6 +30,7 @@ Network_LOCALIZED_RESOURCE_FILES = \
 	EthernetView.gorm \
 	WifiView.gorm \
 	NMSetupPanel.gorm \
+	NetworkInfo.gorm \
 	AddConnection.gorm
 
 #
@@ -37,7 +41,9 @@ Network_HEADER_FILES = \
 	MiniView.h \
 	NMSetup.h \
 	WifiController.h \
-	EthernetController.h
+	EthernetController.h \
+	NetworkInfo.h \
+	STScriptingSupport.h
 
 #
 # Class files
@@ -48,7 +54,9 @@ Network_OBJC_FILES = \
 	ConnectionManager.m \
 	NMSetup.m \
 	WifiController.m \
-	EthernetController.m
+	EthernetController.m \
+	NetworkInfo.m \
+	STScriptingSupport.m
 
 #
 # Other sources

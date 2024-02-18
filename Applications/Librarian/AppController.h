@@ -12,11 +12,13 @@
 #define _PCAPPPROJ_APPCONTROLLER_H
 
 #import <AppKit/AppKit.h>
-// Uncomment if your application is Renaissance-based
-//#import <Renaissance/Renaissance.h>
+#import "Document.h"
 
 @interface AppController : NSObject
 {
+  NSWindow* prefsWindow;
+  NSButton* prefsHideOnDeactivate;
+  NSTextField* prefsDefaultBook;
 }
 
 + (void)  initialize;
@@ -26,6 +28,11 @@
 
 - (void) awakeFromNib;
 
+- (Document*) documentForFile:(NSString*) fileName;
+
+- (void) searchText:(NSString*) text;
+- (void) searchText:(NSString*) text inLibrary:(NSString*) file;
+
 - (void) applicationDidFinishLaunching: (NSNotification *)aNotif;
 - (BOOL) applicationShouldTerminate: (id)sender;
 - (void) applicationWillTerminate: (NSNotification *)aNotif;
@@ -33,6 +40,7 @@
 	    openFile: (NSString *)fileName;
 
 - (void) showPrefPanel: (id)sender;
+- (void) changePrefs: (id)sender;
 
 @end
 

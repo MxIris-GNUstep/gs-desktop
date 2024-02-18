@@ -22,21 +22,31 @@
 #define GSWrapper_libGSWrapper_WrapperDelegate_H
 
 
-#include <AppKit/AppKit.h>
-
-#include "Actions.h"
-
+#import <AppKit/AppKit.h>
+#import "Actions.h"
+#import "ShellUIProxy.h"
+#import "ShellUITask.h"
+#import "WrappedApp.h"
 
 @interface WrapperDelegate : NSObject
 {
     BOOL appDidFinishLaunching;
+    BOOL appIsTerminating;
+
+    NSMenu *menu;
 
     NSTimeInterval lastActionTime;
     NSArray *startupFiles;
     NSDictionary *properties;
 
+    WrappedApp *wrappedApp;
+
     id<Action> mainAction;
     id<Action> openAction;
+    
+    ShellUIProxy *shellDelegate;
+    ShellUITask *shellTask;
+    NSMutableDictionary *shellEnv;
 }
 
 - (id)init;
@@ -51,8 +61,7 @@
 - (void)unixAppExited: (NSNotification*)not;
 
 - (id<Action>)actionForMessage: (NSString *)msg;
-
-- (NSString*)wrapperClassName;
+- (void) performShellUISelector:(SEL) sel withObject:(id) val;
 
 @end
 

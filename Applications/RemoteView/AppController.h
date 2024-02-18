@@ -15,8 +15,13 @@
 
 @interface AppController : NSObject
 {
-   NSTextField* connectionHostname;
-   NSTextField* connectionPassword;
+   NSTextField* connectionParA;
+   NSTextField* connectionParB;
+   NSSecureTextField* connectionParC;
+   NSTextField* labelParA;
+   NSTextField* labelParB;
+   NSTextField* labelParC;
+   NSPopUpButton* connectionType;
    NSPanel* connectionPanel;
 }
 
