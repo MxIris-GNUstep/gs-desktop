@@ -1,14 +1,14 @@
 /*
 */
 
-#import "VNCDisplay.h"
+#import "RDPDisplay.h"
 
-@implementation VNCDisplay
+@implementation RDPDisplay
 
 - (id) init {
   self = [super init];
 
-  [NSBundle loadNibNamed:@"VNCDisplay" owner:self];
+  [NSBundle loadNibNamed:@"RDPDisplay" owner:self];
   buff = [[NSMutableData alloc] init];
   
   return self;
@@ -20,32 +20,37 @@
   [super dealloc];
 }
 
-- (void) connect:(NSURL*) url {
+- (void) setURL:(NSURL*) url {
   ASSIGN(displayURL, url);
+}
 
+- (void) connect {
   [self execTask];
 }
 
 - (void) showWindow {
-  NSString* tok = [NSString stringWithFormat:@"%lu_vncdisplay_window", [displayURL hash]];
-  NSString* tit = [NSString stringWithFormat:@"VNC - %@", [displayURL host]];
+  NSString* tok = [NSString stringWithFormat:@"%lu_rdpdisplay_window", [displayURL hash]];
+  NSString* tit = [NSString stringWithFormat:@"RDP - %@", [displayURL host]];
   [window setFrameUsingName:tok];
   [window setFrameAutosaveName:tok];
   [window makeKeyAndOrderFront:self];
 
   [window setTitle:tit];
+
+  [displayView createXWindow];
 }
 
 - (void) execTask {
   NSMutableArray* args = [NSMutableArray array];
   
   NSString* host = [displayURL host];
-  NSString* cmd = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sdlvncviewer"];
+  NSString* cmd = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"connect_rdp"];
   [args addObject:host];
+  [args addObject:[NSString stringWithFormat:@"0x%lx", [displayView embededXWindowID]]];
   
   //NSDate* limit = [NSDate dateWithTimeIntervalSinceNow:0.3];
   //[[NSRunLoop currentRunLoop] runUntilDate: limit];
-  NSLog(@"start %@", cmd);
+  NSLog(@"start %@ %@", cmd, args);
   
   NSPipe* ipipe = [NSPipe pipe];
   NSPipe* opipe = [NSPipe pipe];
@@ -80,7 +85,7 @@
   NSLog(@"will close");
   [task interrupt];
 
-  NSDate* limit = [NSDate dateWithTimeIntervalSinceNow:0.3];
+  NSDate* limit = [NSDate dateWithTimeIntervalSinceNow:0.1];
   [[NSRunLoop currentRunLoop] runUntilDate: limit];
 
   [self release];
@@ -88,6 +93,7 @@
 
 - (void) taskDidTerminate:(NSNotification*) not {
   NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+  [nc removeObserver:self];
 
   [fin closeFile];
   [fin release];
@@ -101,8 +107,7 @@
   fin = nil;
   fout = nil;
 
-  [nc removeObserver:self name:NSFileHandleReadCompletionNotification object:nil];
-  [nc removeObserver:self name:NSTaskDidTerminateNotification object:nil];
+  connected = NO;
 
   NSLog(@"TERMINATED");
 }
@@ -136,14 +141,7 @@
 }
 
 - (void) processCommand:(NSString*) line {
-  if ([line hasPrefix:@"S:"]) {
-    connected = YES;
-    Window xwinid = [[line substringFromIndex:2] integerValue];
-    [displayView reparentXWindowID:xwinid];
-  }
-  else if ([line hasPrefix:@"Q:"]) {
-    connected = NO;
-  }
+  NSLog(@">>%@", line);
 }
 
 @end
