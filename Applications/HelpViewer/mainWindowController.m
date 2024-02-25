@@ -57,6 +57,9 @@
 	[TextFormatter release];
 
 	prevRow = 0;
+
+        historyManager = [[HistoryManager alloc] init];
+        [historyManager setDelegate: self];
     }
   return self;
 }
@@ -68,31 +71,43 @@
 
 - (void) back: (id) sender 
 {
+  if ([historyManager canBrowseBack])
+    [historyManager browseBack];
 }
 
 - (void) forward: (id) sender 
 {
+  if ([historyManager canBrowseForward])
+    [historyManager browseForward];
 }
 
 - (void) search: (id) sender 
 {
 }
 
+-(BOOL) historyManager: (HistoryManager*) aHistoryManager
+	 needsBrowseTo: (id) aLocation
+{
+  [self loadFile: aLocation];
+  return YES;
+}
+
 - (BOOL) loadFile: (NSString*) fileName 
 {
-    BOOL ret = NO;
-
     ASSIGN (handler, [HandlerStructureXLP new]);
 
     if ([[fileName pathExtension] isEqualToString:@"help"]) {
       NSBundle* Bundle = [NSBundle bundleWithPath: fileName];
+      NSString* path = [Bundle pathForResource: @"main" ofType: @"xlp"];
       [Section setBundle: Bundle];
-      [handler setPath: [Bundle pathForResource: @"main" ofType: @"xlp"]];
+      [handler setPath: path];
       [handler parse];
+      [historyManager browser:self didBrowseTo:path];
     }
     else if ([[fileName pathExtension] isEqualToString:@"xlp"]) {
       [handler setPath: fileName];
       [handler parse];
+      [historyManager browser:self didBrowseTo:fileName];
     }
     else {
       NSLog(@"try to convert %@", fileName);
@@ -106,6 +121,7 @@
 
         [handler setPath: tfile];
         [handler parse];
+        [historyManager browser:self didBrowseTo:tfile];
       }
       else {
         NSLog(@"don't know how to handle %@", fileName);
@@ -145,7 +161,7 @@
     [resultOutlineView selectRow:0 inColumn:0];
     [self browserClick: resultOutlineView];
 
-    return ret;
+    return YES;
 }
 
 - (void) setWindow: (id) win { window = win; }
@@ -320,6 +336,12 @@
 }
 */
 
+- (void) openExternalLink:(NSURL*) url
+{
+
+  [[NSWorkspace sharedWorkspace] openURL: url];
+}
+
 - (BOOL) textView: (NSTextView *) textView
     clickedOnLink: (id) link
               atIndex: (unsigned) charIndex
@@ -331,7 +353,10 @@
 	if ([link isKindOfClass: [NSURL class]])
 	{
 	    NSLog(@"Opening URL : <%@>", [link description]);
-	    ret = [[NSWorkspace sharedWorkspace] openURL: link];
+            [self performSelector:@selector(openExternalLink:)
+                       withObject:link
+                       afterDelay:0.1];
+            ret = YES;
 	}
 	else if ([link isKindOfClass: [NSString class]])
 	{
@@ -480,6 +505,7 @@
     RELEASE ((NSObject*)handler);
     RELEASE (resultTextView);
     RELEASE (resultOutlineView);
+    RELEASE (historyManager);
     [super dealloc];
 }
 
