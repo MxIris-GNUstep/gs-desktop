@@ -7,8 +7,11 @@ libsphinxbase-dev
 pocketsphinx
 pocketsphinx-en-us
 libicns-dev
+libwebp-dev
+libxinerama-dev
 libaspell-dev
 libinput-dev
+libudev-dev
 libao-dev
 libsndfile1-dev
 libflite1
