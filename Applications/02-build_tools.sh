@@ -1,21 +1,21 @@
-#!/bin/bash
+#!/bin/sh
 D=`pwd`
 
+. ../BUILD_SETTINGS.conf
 . /Developer/Makefiles/GNUstep.sh
 
-export PATH=/System/bin:$PATH
-
-function build_app {
+build_app() {
   cd "$D"
   cd ./$1 || exit 1
 
-  make clean
-  make -j2 || exit 1
+  gmake clean
 
-  make install $2
+  gmake $MKARGS || exit 1
+  gmake install $2
 }
 
 build_app "Tools"
+build_app "Preferences"
 build_app "Addresses"
 build_app "Affiche"
 build_app "Calculator"
@@ -33,6 +33,7 @@ build_app "DefaultsManager" 'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "HelpViewer"      'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "FontManager"     'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "BatMon"          'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
+build_app "TimeMon"         'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "VolMon"          'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "OpenUp"          'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "MountUp"         'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
@@ -47,14 +48,23 @@ build_app "ScanImage"       'APP_INSTALL_DIR=$(GNUSTEP_LOCAL_ADMIN_APPS)'
 build_app "NotMon"          'APP_INSTALL_DIR=$(GNUSTEP_SYSTEM_APPS)'
 build_app "GestureHelper"   'APP_INSTALL_DIR=$(GNUSTEP_SYSTEM_APPS)'
 
+###
 cd "$D"
 cd ../Applications/Addresses/Goodies/VCFViewer || exit 1
 
-make -j2 || exit 1
+gmake $MKARGS || exit 1
+gmake install
 
-make install
 ldconfig
 
+###
+cd "$D"
+cd ../../libs-steptalk/Examples/Shell
+
+gmake $MKARGS || exit 1
+gmake install
+
+###
 . /Library/Preferences/GNUstep.conf
 
 
