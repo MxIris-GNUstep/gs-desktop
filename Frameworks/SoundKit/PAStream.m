@@ -32,13 +32,15 @@
 //   const char     *device;
 // } pa_ext_stream_restore_info;
 
-@interface PAStream ()
-@property (assign) NSUInteger volume;
-@property (assign) CGFloat    balance;
-@property (assign) BOOL       mute;
-@end
-
 @implementation PAStream
+
+@synthesize context;
+@synthesize name;
+@synthesize deviceName;
+
+@synthesize volume;
+@synthesize balance;
+@synthesize mute;
 
 - (void)dealloc
 {
@@ -96,8 +98,9 @@
 {
   const pa_ext_stream_restore_info *info;
   
-  info = malloc(sizeof(const pa_ext_stream_restore_info));
-  [value getValue:(void *)info];
+  //Zinfo = malloc(sizeof(const pa_ext_stream_restore_info));
+  //Z[value getValue:(void *)info];
+  info = [value pointerValue];
 
   if (info_copy == NULL) {
     info_copy = malloc(sizeof(struct pa_ext_stream_restore_info));
@@ -105,9 +108,7 @@
   memcpy(info_copy, info, sizeof(*info));
 
   /****/
-  if (_name)
-    [_name release];
-  _name = [[NSString alloc] initWithCString:info->name];
+  self.name = [[NSString alloc] initWithCString:info->name];
 
   [self _updateMute:info_copy];
   [self _updateBalance:info_copy];
@@ -115,41 +116,42 @@
   // self.volume = [self _volumeForInfo:info_copy];
   /***/
 
-  free((void *)info);
+  //Zfree((void *)info);
 
   return self;
 }
 
 - (NSString *)clientName
 {
-  NSArray *comps = [_name componentsSeparatedByString:@":"];
+  NSArray *comps = [self.name componentsSeparatedByString:@":"];
 
   if ([comps count] > 1) {
-    return comps[1];
+    return [comps objectAtIndex:1];
   }
 
-  return _name;
+  return self.name;
 }
 - (NSString *)typeName
 {
-  NSArray *comps = [_name componentsSeparatedByString:@":"];
+  NSArray *comps = [self.name componentsSeparatedByString:@":"];
 
   if ([comps count] > 1) {
-    return comps[0];
+    return [comps objectAtIndex:0];
   }
 
-  return _name;
+  return self.name;
 }
 
 - (void)applyVolume:(NSUInteger)volume
 {
   pa_operation *o;
   
-  for (NSUInteger i = 0; i < info_copy->volume.channels; i++) {
+  NSUInteger i;
+  for (i = 0; i < info_copy->volume.channels; i++) {
     info_copy->volume.values[i] = volume;
   }
 
-  o = pa_ext_stream_restore_write(_context, PA_UPDATE_REPLACE, info_copy,
+  o = pa_ext_stream_restore_write(self.context, PA_UPDATE_REPLACE, info_copy,
                                   1, YES, NULL, NULL);
   if (o) {
     pa_operation_unref(o);
@@ -161,7 +163,7 @@
   
   pa_cvolume_set_balance(&info_copy->volume, &info_copy->channel_map, balance);
   
-  o = pa_ext_stream_restore_write(_context, PA_UPDATE_REPLACE, info_copy,
+  o = pa_ext_stream_restore_write(self.context, PA_UPDATE_REPLACE, info_copy,
                               1, YES, NULL, NULL);
   if (o) {
     pa_operation_unref(o);
@@ -172,7 +174,7 @@
   pa_operation *o;
   
   info_copy->mute = isMute;
-  o = pa_ext_stream_restore_write(_context, PA_UPDATE_REPLACE, info_copy,
+  o = pa_ext_stream_restore_write(self.context, PA_UPDATE_REPLACE, info_copy,
                                   1, YES, NULL, NULL);
   if (o) {
     pa_operation_unref(o);

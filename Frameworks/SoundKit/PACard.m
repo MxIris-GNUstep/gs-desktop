@@ -22,19 +22,25 @@
 #import "PACard.h"
 
 @interface PACard ()
-@property (assign) NSString *activeProfile;
 @end
 
 @implementation PACard
 
+@synthesize context;
+
+@synthesize index;
+@synthesize name;
+@synthesize description;
+
+@synthesize outPorts;
+@synthesize inPorts;
+@synthesize profiles;
+@synthesize activeProfile;
+
 - (void)dealloc
 {
-  if (_name) {
-    [_name release];
-  }
-  if (_profiles) {
-    [_profiles release];
-  }
+  self.name = nil;
+  self.profiles = nil;
   
   [super dealloc];
 }
@@ -42,44 +48,44 @@
 - (void)_updatePorts:(const pa_card_info *)info
 {
   NSMutableArray *ports;
-  NSMutableArray *outPorts;
-  NSMutableArray *inPorts;
+  NSMutableArray *outPorts_;
+  NSMutableArray *inPorts_;
   NSDictionary   *d;
   NSString       *newActivePort;
 
   if (info->n_ports > 0) {
-    outPorts = [NSMutableArray new];
-    inPorts = [NSMutableArray new];
+    outPorts_ = [NSMutableArray new];
+    inPorts_ = [NSMutableArray new];
     
-    for (unsigned i = 0; i < info->n_ports; i++) {
-      d = @{@"Name":[NSString stringWithCString:info->ports[i]->name],
-            @"Description":[NSString stringWithCString:info->ports[i]->description]};
+    unsigned i;
+    for (i = 0; i < info->n_ports; i++) {
+      d = [NSDictionary dictionaryWithObjectsAndKeys:
+            [NSString stringWithCString:info->ports[i]->name],@"Name",
+            [NSString stringWithCString:info->ports[i]->description],@"Description", nil];
       if (info->ports[i]->direction == PA_DIRECTION_OUTPUT) {
-        [outPorts addObject:d];
+        [outPorts_ addObject:d];
       }
       else if (info->ports[i]->direction == PA_DIRECTION_INPUT) {
-        [inPorts addObject:d];
+        [inPorts_ addObject:d];
       }
       else {
-        [outPorts addObject:d];
-        [inPorts addObject:d];
+        [outPorts_ addObject:d];
+        [inPorts_ addObject:d];
       }
     }
 
-    if ([outPorts count] > 0) {
-      if (_outPorts) {
-        [_outPorts release];
-      }
-      _outPorts = [[NSArray alloc] initWithArray:outPorts];
-      [outPorts release];
+    if ([outPorts_ count] > 0) {
+      self.outPorts = outPorts_;
+    }
+    else {
+      self.outPorts = [NSArray array];
     }
     
     if ([inPorts count] > 0) {
-      if (_inPorts) {
-        [_inPorts release];
-      }
-      _inPorts = [[NSArray alloc] initWithArray:inPorts];
-      [inPorts release];
+      self.inPorts = inPorts_;
+    }
+    else {
+      self.inPorts = [NSArray array];
     }
   }
 }
@@ -92,26 +98,22 @@
 
   if (info->n_profiles > 0) {
     profs = [NSMutableArray new];
-    for (unsigned i = 0; i < info->n_profiles; i++) {
-      d = @{@"Name":[NSString stringWithCString:info->profiles2[i]->name],
-            @"Description":[NSString stringWithCString:info->profiles2[i]->description]};
+    unsigned i;
+    for (i = 0; i < info->n_profiles; i++) {
+      d = [NSDictionary dictionaryWithObjectsAndKeys:
+            [NSString stringWithCString:info->profiles2[i]->name], @"Name",
+            [NSString stringWithCString:info->profiles2[i]->description], @"Description", nil];
       [profs addObject:d];
     }
     
     if ([profs count] > 0) {
-      if (_profiles) {
-        [_profiles release];
-      }
-      _profiles = [[NSArray alloc] initWithArray:profs];
+      self.profiles = [[NSArray alloc] initWithArray:profs];
       [profs release];
     }
   }
 
   newActiveProfile = [[NSString alloc] initWithCString:info->active_profile->description];
-  if (_activeProfile == nil || [_activeProfile isEqualToString:newActiveProfile] == NO) {
-    if (_activeProfile) {
-      [_activeProfile release];
-    }
+  if (self.activeProfile == nil || [self.activeProfile isEqualToString:newActiveProfile] == NO) {
     if (info->active_profile != NULL) {
       self.activeProfile = newActiveProfile;
     }
@@ -127,25 +129,22 @@
   const char         *desc;
   
   // Convert PA structure into NSDictionary
-  info = malloc(sizeof(const pa_card_info));
-  [val getValue:(void *)info];
+  //Zinfo = malloc(sizeof(const pa_card_info));
+  //Z[val getValue:(void *)info];
+  info = [val pointerValue];
 
-  _index = info->index;
-  
-  if (_name) {
-    [_name release];
-  }
-  _name = [[NSString alloc] initWithCString:info->name];
+  self.index = info->index;
+  self.name = [[NSString alloc] initWithCString:info->name];
 
   //pa_proplist_gets(info->proplist, "alsa.card_name"); 
   desc = pa_proplist_gets(info->proplist, "device.description"); //no all devices will have alsa.card_name
 
-  _description = [[NSString alloc] initWithCString:desc];
+  self.description = [[NSString alloc] initWithCString:desc];
 
   [self _updateProfiles:info];
   [self _updatePorts:info];
 
-  free ((void *)info);
+  //Zfree ((void *)info);
 
   return self;
 }
@@ -155,13 +154,13 @@
   const char   *profile = NULL;
   pa_operation *o;
  
-  for (NSDictionary *p in _profiles) {
-    if ([p[@"Description"] isEqualToString:profileName]) {
-      profile = [p[@"Name"] cString];
+  for (NSDictionary *p in self.profiles) {
+    if ([[p valueForKey:@"Description"] isEqualToString:profileName]) {
+      profile = [[p valueForKey:@"Name"] cString];
     }
   }
   
-  o = pa_context_set_card_profile_by_index(_context, _index, profile, NULL, self);
+  o = pa_context_set_card_profile_by_index(self.context, index, profile, NULL, self);
   if (o) {
     pa_operation_unref(o);
   }
