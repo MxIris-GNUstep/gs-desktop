@@ -15,9 +15,20 @@ else
   DEBUG_ARGS="--enable-debug"
 fi
 
+UNAME="`uname`"
+DBINC="`pkg-config --cflags dbus-1`"
+
+if [ "$UNAME" = "Linux" ];then
+  export CPPFLAGS="$DBINC"
+  export LDFLAGS=""
+else
+  export CPPFLAGS="$DBINC -I/usr/local/include -I/usr/include"
+  export LDFLAGS="-L/usr/local/lib -I/usr/lib -linotify"
+fi
 
 ./autogen.sh
-./configure --prefix=/System $DEBUG_ARGS --enable-randr --enable-dbus || exit 1
+./configure --prefix=/System $DEBUG_ARGS \
+  --enable-randr --enable-dbus || exit 1
 
 gmake $MKARGS || exit 1
 gmake install || exit 1
