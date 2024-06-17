@@ -4,15 +4,9 @@
 #import <DBusKit/DBusKit.h>
 #import "NetworkManager/NetworkManager.h"
 
-@interface EthernetController : NSObject
+@interface NetworkController : NSObject
 {
-  NSBox         *ethernetView;
-  NSPopUpButton *configureMethod;
-  NSTextField   *ipAddress;
-  NSTextField   *subnetMask;
-  NSTextField   *defaultGateway;
-  NSTextField   *dnsServers;
-  NSTextField   *searchDomains;
+  id networkView;
 }
 
 + (instancetype)controller;
