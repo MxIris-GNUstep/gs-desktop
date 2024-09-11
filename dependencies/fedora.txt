@@ -15,6 +15,7 @@ picom
 fzf
 cmake
 libtool
+util-linux-user
 pam-libs
 pam-devel
 autoconf
@@ -32,6 +33,7 @@ gnuplot
 discount
 openssl-devel
 texlive-dvipdfmx
+texinfo-tex
 ffcall-devel
 libffi-devel
 libxml2-devel
